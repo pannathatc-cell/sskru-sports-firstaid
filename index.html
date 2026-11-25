@@ -1007,6 +1007,28 @@ html[data-theme="dark"] .gcard h4 .n{color:var(--brand-300)}
 .ph-gal a span{display:block;padding:5px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ph-cnt{display:inline-block;font-size:11px;margin-left:4px;color:var(--ink-400)}
 @media print{ .mic-btn,#micBanner{display:none!important} .p-photos{display:flex;flex-wrap:wrap;gap:6px} .p-photos img{width:120px;height:90px;object-fit:cover;border:1px solid #ccc;border-radius:4px} }
+
+/* ---------- recorder identity ---------- */
+.who-box{display:flex;gap:7px;align-items:stretch}
+.who-box input{flex:1;min-width:0;cursor:pointer;font-weight:600;background:var(--surface)}
+.who-box .btn{flex:0 0 auto}
+.who-sub{font-size:11px;color:var(--ink-400);line-height:1.4}
+.who-sub b{color:var(--brand-700)}
+.who-intro{display:flex;gap:12px;align-items:center;margin-bottom:14px}
+.who-intro .mascot{width:76px;flex:0 0 auto}
+.who-intro p{margin:0;font-size:12.5px;color:var(--ink-500);line-height:1.6}
+.rec-who{font-size:12.5px;line-height:1.35}
+.rec-who small{display:block;color:var(--ink-400);font-size:11px}
+.inc{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:#fdf3dc;color:#7a5600;margin-top:3px;white-space:nowrap}
+.inc.ok{background:#e4f5e4;color:#0a6b0a}
+html[data-theme="dark"] .inc{background:#2e2412;color:#f5cd6b}
+html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
+.prov-box{border:1px solid var(--line);border-left:4px solid var(--brand-600);background:var(--surface-2);border-radius:var(--r-md);padding:10px 14px;margin-bottom:12px;font-size:12.5px;line-height:1.7;color:var(--ink-700)}
+.prov-box b{color:var(--ink-900)}
+.prov-box .miss{color:#7a5600}
+#recSum tr[data-who]{cursor:pointer}
+#recSum tr[data-who]:hover td{background:var(--brand-050)}
+#recSum tr.sel td{background:var(--brand-100)}
 </style>
 </head>
 <body>
@@ -1082,6 +1104,9 @@ html[data-theme="dark"] .gcard h4 .n{color:var(--brand-300)}
     <input type="hidden" name="deviceInfo" id="fDevice">
     <input type="hidden" name="suppliesJson" id="fSupJson">
     <input type="hidden" name="symptomGroup" id="symptomGroup">
+    <input type="hidden" name="recordedByName" id="fRecBy">
+    <input type="hidden" name="recorderRole" id="fRecRole">
+    <input type="hidden" name="recorderContact" id="fRecContact">
 
     <!-- ยินดีต้อนรับ + ผู้บันทึก + แหล่งที่มา -->
     <div class="hello">
@@ -1098,8 +1123,12 @@ html[data-theme="dark"] .gcard h4 .n{color:var(--brand-300)}
         </div>
         <div class="grid">
           <div class="field c4">
-            <label class="lb" for="recordedByName">ชื่อผู้บันทึกข้อมูล <span class="req">*</span></label>
-            <input type="text" id="recordedByName" name="recordedByName" list="dlRecorder" placeholder="ชื่อ–สกุล (ระบบจำไว้ในเครื่องนี้)">
+            <label class="lb" for="recordedByName">ผู้บันทึกข้อมูล (เครื่องนี้) <span class="req">*</span></label>
+            <div class="who-box" id="whoBox">
+              <input type="text" id="recordedByName" readonly placeholder="กดเพื่อระบุผู้บันทึก">
+              <button type="button" class="btn btn-gold btn-sm" id="whoChange">เปลี่ยน / ส่งเวร</button>
+            </div>
+            <span class="who-sub" id="whoSub">ต้องระบุก่อนบันทึก — ใช้ติดตามกรณีข้อมูลไม่ครบหรือผิดพลาด</span>
           </div>
           <div class="field c4">
             <label class="lb" for="examiner">ผู้ตรวจ / นักศึกษาพยาบาล</label>
@@ -1323,8 +1352,14 @@ html[data-theme="dark"] .gcard h4 .n{color:var(--brand-300)}
     <select id="fGroup"><option value="">ทุกกลุ่มโรค</option></select>
     <select id="fTri"><option value="">ทุกระดับ</option><option value="red">🔴 แดง</option><option value="yellow">🟡 เหลือง</option><option value="green">🟢 เขียว</option></select>
     <select id="fSource"><option value="">ทุกแหล่งที่มา</option><option>ศูนย์อำนวยการปฐมพยาบาล</option><option>พยาบาลสนาม</option></select>
+    <select id="fRecorder"><option value="">ทุกผู้บันทึก</option></select>
+    <select id="fComplete"><option value="">ความครบถ้วน: ทั้งหมด</option><option value="no">⚠ เฉพาะข้อมูลไม่ครบ</option><option value="yes">✓ เฉพาะข้อมูลครบ</option></select>
     <button class="btn btn-ghost btn-sm" id="btnCsv">⬇ CSV</button>
     <button class="btn btn-ghost btn-sm" id="btnReload">⟳ รีเฟรช</button>
+  </div>
+  <div class="card" id="recCard">
+    <div class="card-hd"><div class="step gold">👤</div><h2>สรุปตามผู้บันทึกข้อมูล<span class="sub">RECORDER ACCOUNTABILITY · กดชื่อเพื่อดูเฉพาะบันทึกของผู้นั้น</span></h2></div>
+    <div class="card-bd" style="padding:0"><div style="overflow:auto"><table class="tbl-plain" id="recSum"></table></div></div>
   </div>
   <div class="tbl-wrap" id="tblWrap"></div>
 </section>
@@ -1547,6 +1582,26 @@ html[data-theme="dark"] .gcard h4 .n{color:var(--brand-300)}
     <div class="modal-hd"><h3 id="supTitle">รายการคลัง</h3><button class="x" id="supClose">✕</button></div>
     <div class="modal-bd" id="supBody"></div>
     <div class="modal-ft" id="supFoot"></div>
+  </div>
+</div>
+
+<!-- ============ MODAL : RECORDER PROFILE ============ -->
+<div class="overlay" id="ovWho">
+  <div class="modal sm">
+    <div class="modal-hd"><h3>👤 ผู้บันทึกข้อมูล</h3><button class="x" id="whoClose">✕</button></div>
+    <div class="modal-bd">
+      <div class="who-intro"><img class="mascot" id="whoMascot" alt=""><p>ระบุตัวตนก่อนเริ่มบันทึก — ชื่อนี้จะผูกกับทุกบันทึกที่ทำจากเครื่องนี้ เพื่อให้ติดตามได้หากข้อมูลไม่ครบหรือผิดพลาด<br><b>เปลี่ยนเวร/เปลี่ยนคน</b> ให้กดเปลี่ยนผู้บันทึกทุกครั้ง</p></div>
+      <div class="grid">
+        <div class="field c12"><label class="lb" for="pName">ชื่อ–สกุล <span class="req">*</span></label><input type="text" id="pName" list="dlRecorder" placeholder="เช่น นศพ.สมใจ ใจดี"></div>
+        <div class="field c6"><label class="lb" for="pRole">บทบาท <span class="req">*</span></label>
+          <select id="pRole"><option value="">— เลือก —</option><option>อาจารย์พยาบาล</option><option>พยาบาลวิชาชีพ</option>
+            <option>นักศึกษาพยาบาล ชั้นปีที่ 1</option><option>นักศึกษาพยาบาล ชั้นปีที่ 2</option><option>นักศึกษาพยาบาล ชั้นปีที่ 3</option><option>นักศึกษาพยาบาล ชั้นปีที่ 4</option>
+            <option>ผู้ช่วยพยาบาล</option><option>เจ้าหน้าที่ / อาสาสมัคร</option><option>อื่น ๆ</option></select></div>
+        <div class="field c6"><label class="lb" for="pId">รหัสนักศึกษา / บุคลากร</label><input type="text" id="pId" placeholder="ถ้ามี"></div>
+        <div class="field c12"><label class="lb" for="pPhone">เบอร์โทร / LINE ID <span class="req">*</span></label><input type="text" id="pPhone" placeholder="สำหรับติดต่อกลับเมื่อข้อมูลไม่ครบ"></div>
+      </div>
+    </div>
+    <div class="modal-ft"><button class="btn btn-primary" id="whoSave">เริ่มบันทึกในชื่อนี้</button></div>
   </div>
 </div>
 
@@ -2303,16 +2358,51 @@ function renderSysInfo(){
 /* ===================================================================
    IDENTITY
    =================================================================== */
+/* ---------- ผู้บันทึกข้อมูล (โปรไฟล์ประจำเครื่อง) ---------- */
+function profile(){
+  var p = {}; try { p = JSON.parse(lsGet('fa_profile') || '{}') || {}; } catch (e){ p = {}; }
+  if (!p.name && lsGet('fa_recordedByName')) p.name = lsGet('fa_recordedByName');
+  return p;
+}
+function contactOf(p){ return [p.id ? 'รหัส ' + p.id : '', p.phone ? 'โทร/LINE ' + p.phone : ''].filter(Boolean).join(' · '); }
+function openWho(){
+  var p = profile();
+  $('pName').value = p.name || ''; $('pRole').value = p.role || ''; $('pId').value = p.id || ''; $('pPhone').value = p.phone || '';
+  $('ovWho').classList.add('on'); setTimeout(function(){ $('pName').focus(); }, 80);
+}
+function saveWho(){
+  var p = { name:$('pName').value.trim(), role:$('pRole').value, id:$('pId').value.trim(), phone:$('pPhone').value.trim() };
+  if (!p.name){ toast('กรุณากรอกชื่อ–สกุลผู้บันทึก', 'warn'); $('pName').focus(); return; }
+  if (!p.role){ toast('กรุณาเลือกบทบาท', 'warn'); $('pRole').focus(); return; }
+  if (!p.phone){ toast('กรุณากรอกเบอร์โทรหรือ LINE ID เพื่อใช้ติดต่อกลับ', 'warn'); $('pPhone').focus(); return; }
+  var prev = profile().name;
+  lsSet('fa_profile', JSON.stringify(p)); lsSet('fa_recordedByName', p.name);
+  $('ovWho').classList.remove('on'); paintUser();
+  toast(prev && prev !== p.name ? 'เปลี่ยนผู้บันทึกเป็น ' + p.name + ' แล้ว' : 'เริ่มบันทึกในชื่อ ' + p.name);
+  if (prev !== p.name && hasGas()) call('logClientAction', ['เปลี่ยนผู้บันทึก', (prev || '—') + ' → ' + p.name + ' (' + p.role + ')', p.name], null, true);
+}
 function initIdentity(){
-  ['recordedByName','examiner','servicePoint'].forEach(function(k){
+  ['examiner','servicePoint'].forEach(function(k){
     var v = lsGet('fa_' + k); if (v) $(k).value = v;
-    $(k).addEventListener('change', function(){ lsSet('fa_' + k, $(k).value.trim()); paintUser(); });
+    $(k).addEventListener('change', function(){ lsSet('fa_' + k, $(k).value.trim()); });
   });
   var src = lsGet('fa_source'); if (src) setSource(src);
+  $('whoMascot').src = IMG.nurse2;
+  $('recordedByName').addEventListener('click', openWho);
+  $('whoChange').addEventListener('click', openWho);
+  $('whoSave').addEventListener('click', saveWho);
+  $('pPhone').addEventListener('keydown', function(e){ if (e.key === 'Enter') saveWho(); });
+  $('whoClose').addEventListener('click', function(){ $('ovWho').classList.remove('on'); });
   paintUser();
-  $('userChip').addEventListener('click', function(){ switchTab('form'); window.scrollTo({ top:0, behavior:'smooth' }); setTimeout(function(){ $('recordedByName').focus(); }, 300); });
+  $('userChip').addEventListener('click', openWho);
+  if (!profile().name || !profile().role) setTimeout(openWho, 700);
 }
-function paintUser(){ var n = $('recordedByName').value.trim(); $('userName').textContent = n || 'ระบุผู้บันทึก'; }
+function paintUser(){
+  var p = profile();
+  $('recordedByName').value = p.name || '';
+  $('userName').textContent = p.name ? p.name + (p.role ? ' · ' + p.role.replace('นักศึกษาพยาบาล ชั้นปีที่ ', 'นศ.ปี ') : '') : 'ระบุผู้บันทึก';
+  $('whoSub').innerHTML = p.name ? '<b>' + esc(p.role || 'ยังไม่ระบุบทบาท') + '</b>' + (contactOf(p) ? ' · ' + esc(contactOf(p)) : '') : 'ต้องระบุก่อนบันทึก — ใช้ติดตามกรณีข้อมูลไม่ครบหรือผิดพลาด';
+}
 function setSource(v){
   $('source').value = v || '';
   document.querySelectorAll('#srcPick .src-b').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-v') === v); });
@@ -2322,7 +2412,7 @@ function setSource(v){
 /* ===================================================================
    FORM
    =================================================================== */
-var KEEP_FIELDS = ['recordedByName','examiner','servicePoint','source','entryChannel','deviceInfo'];
+var KEEP_FIELDS = ['examiner','servicePoint','source','entryChannel','deviceInfo'];
 function readForm(){
   calcBMI();
   $('fSupJson').value = JSON.stringify(STATE.sup);
@@ -2353,7 +2443,8 @@ function clearForm(silent){
   $('recForm').reset();
   Object.keys(keep).forEach(function(k){ var el = document.querySelector('#recForm [name="' + k + '"]'); if (el) el.value = keep[k]; });
   setSource(keep.source); $('patientType').value = pt;
-  ['fId','fBmi','fBmiClass','fSupJson','symptomGroup'].forEach(function(id){ $(id).value = ''; });
+  ['fId','fBmi','fBmiClass','fSupJson','symptomGroup','fRecBy','fRecRole','fRecContact'].forEach(function(id){ $(id).value = ''; });
+  saveArm = false; $('btnSaveTxt').textContent = 'บันทึกข้อมูล';
   STATE.sup = []; renderSupList(); setPain(''); mediaClear();
   $('examDate').value = todayStr(); $('arriveTime').value = nowTime();
   document.querySelectorAll('.as-case').forEach(function(b){ b.classList.remove('on'); });
@@ -2459,15 +2550,50 @@ function renderSupList(){
   box.querySelectorAll('[data-del]').forEach(function(b){ b.addEventListener('click', function(){ STATE.sup.splice(+b.getAttribute('data-del'), 1); renderSupList(); }); });
 }
 
+/* ---------- ความครบถ้วนของข้อมูล ---------- */
+var REQ_FIELDS = [['name','ชื่อผู้รับบริการ'],['gender','เพศ'],['age','อายุ'],['chiefComplaint','อาการสำคัญ'],
+  ['_vs','สัญญาณชีพ (T/PR/BP อย่างน้อย 1)'],['impression','การประเมิน'],['treatment','การรักษา'],['disposition','ผลการดูแล'],['examiner','ผู้ตรวจ']];
+function missingOf(r){
+  return REQ_FIELDS.filter(function(q){
+    if (q[0] === '_vs') return !(String(r.pr || '').trim() || String(r.bp || '').replace('/', '').trim() || String(r.temp || '').trim());
+    return !String(r[q[0]] || '').trim();
+  }).map(function(q){ return q[1]; });
+}
+function incBadge(r){
+  var m = missingOf(r);
+  return m.length ? '<span class="inc" title="ขาด: ' + esc(m.join(', ')) + '">⚠ ไม่ครบ ' + m.length + ' ช่อง</span>' : '<span class="inc ok">✓ ครบ</span>';
+}
+var saveArm = false, saveArmT = null;
+function callSave(o, cb){
+  if (!hasGas()){ call('saveRecord', [o], cb); return; }
+  loader(true);
+  google.script.run.withSuccessHandler(function(res){ loader(false); cb(res); })
+    .withFailureHandler(function(e){
+      var m = String((e && e.message) || e);
+      if (/saveRecord2|unknown|ไม่รู้จัก|not a function|not defined/i.test(m)) call('saveRecord', [o], function(res){ loader(false); cb(res); }, true);
+      else { loader(false); toast('ผิดพลาด: ' + m, 'err'); }
+    }).saveRecord2(o);
+}
+
 /* save */
 function save(){
-  var o = readForm();
-  if (!o.recordedByName){ toast('กรุณากรอก “ชื่อผู้บันทึกข้อมูล” ก่อนบันทึก', 'warn'); $('recordedByName').focus(); return; }
+  var o = readForm(), P = profile();
+  if (!P.name || !P.role){ toast('กรุณาระบุ “ผู้บันทึกข้อมูล” ก่อนบันทึก', 'warn'); openWho(); return; }
+  o.editorName = P.name;
+  if (!o.id || !o.recordedByName){ o.recordedByName = P.name; o.recorderRole = P.role; o.recorderContact = contactOf(P); }
   if (!o.source){ toast('กรุณาเลือก “แหล่งที่มาของข้อมูล” ก่อนบันทึก', 'warn'); $('srcPick').scrollIntoView({ behavior:'smooth', block:'center' }); return; }
   if (!o.name && !o.surname && !o.hn){ toast('กรุณากรอกชื่อ หรือ HN/เลขบัตร อย่างน้อย 1 ช่อง', 'warn'); $('name').focus(); return; }
   if (!o.symptomGroup){ var s = classify(o); if (s) o.symptomGroup = s; }
-  lsSet('fa_recordedByName', o.recordedByName); lsSet('fa_examiner', o.examiner); lsSet('fa_servicePoint', o.servicePoint);
-  call('saveRecord', [o], function(res){
+  var miss = missingOf(o);
+  if (miss.length && !saveArm){
+    saveArm = true; $('btnSaveTxt').textContent = 'ข้อมูลยังไม่ครบ — กดอีกครั้งเพื่อบันทึก';
+    toast('ข้อมูลยังไม่ครบ ' + miss.length + ' ช่อง: ' + miss.join(', ') + ' — เติมให้ครบ หรือกด “บันทึก” อีกครั้งเพื่อบันทึกไปก่อน (ระบบจะติดป้าย “ไม่ครบ” ไว้ให้ติดตาม)', 'warn');
+    clearTimeout(saveArmT); saveArmT = setTimeout(function(){ saveArm = false; $('btnSaveTxt').textContent = $('fId').value ? 'บันทึกการแก้ไข' : 'บันทึกข้อมูล'; }, 8000);
+    return;
+  }
+  saveArm = false; clearTimeout(saveArmT);
+  lsSet('fa_examiner', o.examiner); lsSet('fa_servicePoint', o.servicePoint);
+  callSave(o, function(res){
     if (res && res.ok){
       toast(res.message + ' (' + res.id + ')');
       (res.warnings || []).forEach(function(w){ toast('⚠ เวชภัณฑ์ใกล้หมด: ' + w, 'warn'); });
@@ -2501,20 +2627,49 @@ function afterRows(){
   $('tRef').textContent = tr.filter(function(r){ return isRefer(r.disposition); }).length;
   var names = {}; rows.forEach(function(r){ [r.recordedByName, r.examiner].forEach(function(n){ if (n) names[n] = 1; }); });
   setDatalist('dlRecorder', Object.keys(names).sort());
-  renderTable(); renderSupDatalist();
+  var rcs = {}; rows.forEach(function(r){ rcs[r.recordedByName || 'ไม่ระบุชื่อ'] = 1; });
+  var keepWho = $('fRecorder').value; fillSelect('fRecorder', Object.keys(rcs).sort(), 'ทุกผู้บันทึก', keepWho);
+  renderTable(); renderRecSum(); renderSupDatalist();
   if (typeof asRenderAllChips === 'function') asRenderAllChips();
   if (isActive('dash')) renderDashboard();
   if (isActive('daily')) renderDaily();
   if (isActive('stock')) renderStock();
 }
+function renderRecSum(){
+  var m = {}, t = todayStr(), sel = $('fRecorder').value;
+  STATE.rows.forEach(function(r){
+    var k = r.recordedByName || 'ไม่ระบุชื่อ';
+    if (!m[k]) m[k] = { name:k, role:'', contact:'', n:0, today:0, inc:0, last:'' };
+    var x = m[k]; x.n++; if (recDate(r) === t) x.today++; if (missingOf(r).length) x.inc++;
+    if (r.recorderRole) x.role = r.recorderRole; if (r.recorderContact) x.contact = r.recorderContact;
+    if (String(r.createdAt) > x.last) x.last = String(r.createdAt);
+  });
+  var list = Object.keys(m).map(function(k){ return m[k]; }).sort(function(a, b){ return b.inc - a.inc || b.n - a.n; });
+  $('recSum').innerHTML = list.length ? '<thead><tr><th>ผู้บันทึก</th><th>บทบาท</th><th>ติดต่อ</th><th class="n">บันทึกทั้งหมด</th><th class="n">วันนี้</th><th class="n">ข้อมูลไม่ครบ</th><th>บันทึกล่าสุด</th></tr></thead><tbody>' +
+    list.map(function(x){
+      return '<tr data-who="' + esc(x.name) + '" data-inc="' + x.inc + '"' + (sel === x.name ? ' class="sel"' : '') + '><td><b>' + esc(x.name) + '</b></td><td>' + esc(x.role || '–') + '</td><td>' + esc(x.contact || '–') + '</td>' +
+        '<td class="n">' + x.n + '</td><td class="n">' + x.today + '</td><td class="n">' + (x.inc ? '<span class="inc">⚠ ' + x.inc + '</span>' : '<span class="inc ok">✓ 0</span>') + '</td><td class="mono">' + esc(x.last) + '</td></tr>';
+    }).join('') + '</tbody>' : '<tbody><tr><td style="color:var(--ink-400);padding:16px">ยังไม่มีบันทึก</td></tr></tbody>';
+  $('recSum').querySelectorAll('tr[data-who]').forEach(function(tr){
+    tr.addEventListener('click', function(){
+      var w = tr.getAttribute('data-who'), on = $('fRecorder').value !== w;
+      $('fRecorder').value = on ? w : '';
+      $('fComplete').value = on && +tr.getAttribute('data-inc') ? 'no' : '';
+      renderTable(); renderRecSum();
+    });
+  });
+}
 function isActive(name){ var p = $('panel-' + name); return p && p.classList.contains('active'); }
 function filtered(){
-  var q = $('q').value.trim().toLowerCase(), d = $('fDate').value, g = $('fGroup').value, tri = $('fTri').value, sc = $('fSource').value;
+  var q = $('q').value.trim().toLowerCase(), d = $('fDate').value, g = $('fGroup').value, tri = $('fTri').value, sc = $('fSource').value,
+      who = $('fRecorder').value, cp = $('fComplete').value;
   return STATE.rows.filter(function(r){
     if (d && recDate(r) !== d) return false;
     if (g && gKey(r) !== g) return false;
     if (tri && (r.triage || 'green') !== tri) return false;
     if (sc && r.source !== sc) return false;
+    if (who && (r.recordedByName || 'ไม่ระบุชื่อ') !== who && (r.updatedBy || '') !== who) return false;
+    if (cp && (missingOf(r).length > 0) !== (cp === 'no')) return false;
     if (!q) return true;
     return ['id','name','surname','hn','team','sport','chiefComplaint','impression','treatment','suppliesText','examiner','recordedByName','servicePoint','disposition']
       .some(function(k){ return String(r[k] || '').toLowerCase().indexOf(q) > -1; });
@@ -2533,7 +2688,7 @@ function renderTable(){
   var rows = filtered(), w = $('tblWrap');
   if (!rows.length){ w.innerHTML = emptyMascot(STATE.rows.length ? 'ไม่พบข้อมูลที่ตรงกับเงื่อนไข' : 'ยังไม่มีบันทึก — เริ่มบันทึกผู้รับบริการรายแรกได้เลย'); return; }
   var h = '<table class="rec"><thead><tr><th>วันที่ / เวลา</th><th>รหัส</th><th>ชื่อ–สกุล</th><th>ประเภท · กีฬา · ทีม</th><th>กลุ่มโรค</th>' +
-    '<th>ระดับ</th><th>V/S</th><th>อาการสำคัญ</th><th>ผลการดูแล</th><th style="text-align:right">จัดการ</th></tr></thead><tbody>';
+    '<th>ระดับ</th><th>V/S</th><th>อาการสำคัญ</th><th>ผลการดูแล</th><th>ผู้บันทึก / ความครบถ้วน</th><th style="text-align:right">จัดการ</th></tr></thead><tbody>';
   rows.forEach(function(r){
     var g = gMeta(gKey(r));
     h += '<tr data-id="' + esc(r.id) + '">' +
@@ -2546,6 +2701,7 @@ function renderTable(){
       '<td class="mono">' + esc(vsTxt(r) || '-') + '</td>' +
       '<td style="max-width:220px">' + esc(clip(r.chiefComplaint || '-', 60)) + '</td>' +
       '<td style="max-width:170px;font-size:12.5px">' + esc(r.disposition || '-') + '</td>' +
+      '<td class="rec-who">' + esc(r.recordedByName || 'ไม่ระบุ') + '<small>' + esc(r.recorderRole || '') + (r.updatedBy && r.updatedBy !== r.recordedByName ? ' · แก้ไขโดย ' + esc(r.updatedBy) : '') + '</small>' + incBadge(r) + '</td>' +
       '<td><div class="row-act" style="justify-content:flex-end"><button class="btn btn-ghost btn-sm" data-act="view">ดู</button>' +
       '<button class="btn btn-gold btn-sm" data-act="edit">แก้ไข</button></div></td></tr>';
   });
@@ -2570,7 +2726,7 @@ function exportCsv(){
   if (!rows.length){ toast('ไม่มีข้อมูลให้ส่งออก', 'warn'); return; }
   var cols = ['id','examDate','arriveTime','name','surname','gender','age','patientType','sport','team','chiefComplaint','mechanism','injurySite',
     'temp','pr','rr','bp','spo2','painScore','loc','symptomGroup','triage','impression','treatment','suppliesText','advice','disposition','referTo',
-    'examiner','recordedByName','source','servicePoint','createdAt','updatedAt'];
+    'examiner','recordedByName','recorderRole','recorderContact','updatedBy','source','servicePoint','createdAt','updatedAt'];
   var q = function(v){ v = String(v == null ? '' : v); return '"' + v.replace(/"/g, '""') + '"'; };
   var csv = '﻿' + cols.join(',') + '\n' + rows.map(function(r){
     return cols.map(function(c){ return q(c === 'symptomGroup' ? gMeta(gKey(r)).name : r[c]); }).join(',');
@@ -2586,6 +2742,7 @@ function exportCsv(){
 
 /* ---------- modal ---------- */
 var LABELS = {
+  recorderRole:'บทบาทผู้บันทึก', recorderContact:'ติดต่อผู้บันทึก',
   examDate:'วันที่', arriveTime:'เวลามาถึง', dischargeTime:'เวลาจำหน่าย', hn:'HN / เลขบัตร', name:'ชื่อ', surname:'นามสกุล', gender:'เพศ', age:'อายุ (ปี)',
   patientType:'ประเภทผู้รับบริการ', sport:'ชนิดกีฬา', team:'สังกัด / ทีม', examiner:'ผู้ตรวจ',
   chiefComplaint:'อาการสำคัญ', mechanism:'กลไกการบาดเจ็บ', presentIllness:'ประวัติปัจจุบัน', pastHistory:'โรคประจำตัว / ประวัติเดิม',
@@ -2604,7 +2761,7 @@ var SECTIONS = [
   ['การตรวจร่างกาย', ['injurySite','heent','heart','lung','abdominal','extremities','neuro']],
   ['กลุ่มโรค การประเมิน และการรักษา', ['symptomGroup','impression','treatment','suppliesText','advice']],
   ['ผลการดูแล', ['disposition','referTo','dischargeTime']],
-  ['แหล่งที่มาของข้อมูล', ['source','servicePoint','recordedByName','entryChannel','deviceInfo','enteredBy','updatedBy','createdAt','updatedAt','appVersion']]
+  ['แหล่งที่มาของข้อมูล', ['source','servicePoint','recordedByName','recorderRole','recorderContact','entryChannel','deviceInfo','enteredBy','updatedBy','createdAt','updatedAt','appVersion']]
 ];
 function fieldVal(r, k){
   if (k === 'symptomGroup'){ var g = gMeta(gKey(r)); return g.icon + ' ' + g.name; }
@@ -2616,7 +2773,11 @@ function openModal(id){
   var r = byId(id); if (!r) return;
   STATE.current = r;
   $('mTitle').textContent = (r.name || '') + ' ' + (r.surname || '') + '  ·  ' + r.id;
-  var h = '<dl class="dl">';
+  var miss = missingOf(r);
+  var h = '<div class="prov-box">👤 บันทึกโดย <b>' + esc(r.recordedByName || 'ไม่ระบุ') + '</b>' + (r.recorderRole ? ' (' + esc(r.recorderRole) + ')' : '') +
+    (r.recorderContact ? ' · ' + esc(r.recorderContact) : '') + ' · เมื่อ ' + esc(r.createdAt || '–') +
+    (r.updatedBy && (r.updatedBy !== r.recordedByName || r.updatedAt !== r.createdAt) ? '<br>✎ แก้ไขล่าสุดโดย <b>' + esc(r.updatedBy) + '</b> · ' + esc(r.updatedAt || '') : '') +
+    '<br>' + (miss.length ? '<span class="miss">⚠ ข้อมูลยังไม่ครบ: ' + esc(miss.join(', ')) + ' — ติดต่อผู้บันทึกเพื่อเติมข้อมูล</span>' : '✓ ข้อมูลครบตามเกณฑ์') + '</div><dl class="dl">';
   SECTIONS.forEach(function(sec){
     h += '<div class="sechd">' + esc(sec[0]) + '</div>';
     sec[1].forEach(function(k){ var v = fieldVal(r, k);
@@ -2659,7 +2820,7 @@ function printRecord(r){
       ' เวลา ' + esc(r.arriveTime || '—') + '</span><span>HN: ' + v('hn') + '</span></div>' +
     '<div class="p-tri" data-lv="' + esc(r.triage || 'green') + '">' + triMeta(r.triage).icon + ' ระดับความเร่งด่วน: ' + esc(triMeta(r.triage).name) +
       ' <span>· กลุ่มโรค: ' + esc(gMeta(gKey(r)).name) + '</span></div>' +
-    '<div class="p-src"><b>แหล่งที่มา:</b> ' + v('source') + ' &nbsp;<b>จุดบริการ:</b> ' + v('servicePoint') + ' &nbsp;<b>ผู้บันทึก:</b> ' + v('recordedByName') + '</div>' +
+    '<div class="p-src"><b>แหล่งที่มา:</b> ' + v('source') + ' &nbsp;<b>จุดบริการ:</b> ' + v('servicePoint') + '<br><b>ผู้บันทึก:</b> ' + v('recordedByName') + (r.recorderRole ? ' (' + esc(r.recorderRole) + ')' : '') + (r.recorderContact ? ' · ' + esc(r.recorderContact) : '') + (r.updatedBy && r.updatedBy !== r.recordedByName ? ' &nbsp;<b>แก้ไขล่าสุด:</b> ' + esc(r.updatedBy) : '') + '</div>' +
     '<div class="p-sec"><h4>ข้อมูลผู้รับบริการ</h4><div class="p-row">' +
       '<span><b>ชื่อ–สกุล:</b> ' + esc((r.name || '') + ' ' + (r.surname || '')) + '</span><span><b>เพศ:</b> ' + v('gender') + '</span>' +
       '<span><b>อายุ:</b> ' + v('age') + ' ปี</span><span><b>ประเภท:</b> ' + v('patientType') + '</span><span><b>กีฬา:</b> ' + v('sport') +
@@ -2673,7 +2834,7 @@ function printRecord(r){
       line('advice') + '</div>' +
     (photosOf(r.id).length ? '<div class="p-sec"><h4>รูปภาพประกอบ</h4><div class="p-photos">' + photosOf(r.id).filter(function(p){ return p.thumb; }).map(function(p){ return '<img src="' + p.thumb + '">'; }).join('') + '</div></div>' : '') +
     '<div class="p-sec"><h4>ผลการดูแล</h4>' + line('disposition') + line('referTo') + line('dischargeTime') + '</div>' +
-    '<div class="p-sign"><div>ลงชื่อผู้ตรวจ<br>(' + v('examiner') + ')</div><div>ลงชื่ออาจารย์ผู้ควบคุม<br>(............................................)</div></div>' +
+    '<div class="p-sign"><div>ลงชื่อผู้ตรวจ<br>(' + v('examiner') + ')</div><div>ลงชื่อผู้บันทึก<br>(' + v('recordedByName') + ')</div><div>ลงชื่ออาจารย์ผู้ควบคุม<br>(............................................)</div></div>' +
     '<div class="p-foot">พิมพ์เมื่อ ' + new Date().toLocaleString('th-TH') + ' · ระบบบันทึกการปฐมพยาบาลงานกีฬา ' + esc(r.appVersion || '') + ' · คณะพยาบาลศาสตร์ มหาวิทยาลัยราชภัฏศรีสะเกษ</div>';
   $('printArea').innerHTML = html;
   setTimeout(function(){ window.print(); }, 150);
@@ -2937,12 +3098,12 @@ function renderDaily(){
 
   // patient list
   var list = rows.slice().sort(function(a, b){ return String(recTime(a)).localeCompare(String(recTime(b))); });
-  $('dayList').innerHTML = list.length ? '<thead><tr><th>#</th><th>เวลา</th><th>รหัส</th><th>ชื่อ–สกุล</th><th>ประเภท/กีฬา/ทีม</th><th>กลุ่มโรค</th><th>ระดับ</th><th>อาการสำคัญ</th><th>การรักษา / ยาและเวชภัณฑ์</th><th>ผลการดูแล</th><th>ผู้ตรวจ</th></tr></thead><tbody>' +
+  $('dayList').innerHTML = list.length ? '<thead><tr><th>#</th><th>เวลา</th><th>รหัส</th><th>ชื่อ–สกุล</th><th>ประเภท/กีฬา/ทีม</th><th>กลุ่มโรค</th><th>ระดับ</th><th>อาการสำคัญ</th><th>การรักษา / ยาและเวชภัณฑ์</th><th>ผลการดูแล</th><th>ผู้ตรวจ / ผู้บันทึก</th></tr></thead><tbody>' +
     list.map(function(r, i){
       return '<tr><td>' + (i + 1) + '</td><td class="mono">' + esc(recTime(r)) + '</td><td class="mono">' + esc(r.id) + '</td><td><b>' + esc((r.name || '') + ' ' + (r.surname || '')) + '</b></td>' +
         '<td>' + esc([r.patientType, r.sport, r.team].filter(Boolean).join(' · ')) + '</td><td>' + esc(gMeta(gKey(r)).name) + '</td><td>' + triBadge(r.triage) + '</td>' +
         '<td>' + esc(clip(r.chiefComplaint || '-', 60)) + '</td><td>' + esc(clip(r.treatment || '-', 70)) + '<div class="mono">' + esc(recLines(r).map(function(l){ return l.name + ' ' + l.qty + ' ' + (l.unit || ''); }).join(', ')) + '</div></td>' +
-        '<td>' + esc(r.disposition || '-') + (r.referTo ? '<div class="mono">→ ' + esc(r.referTo) + '</div>' : '') + '</td><td>' + esc(r.examiner || '-') + '</td></tr>';
+        '<td>' + esc(r.disposition || '-') + (r.referTo ? '<div class="mono">→ ' + esc(r.referTo) + '</div>' : '') + '</td><td>' + esc(r.examiner || '-') + '<div class="mono">✎ ' + esc(r.recordedByName || '-') + '</div>' + (missingOf(r).length ? incBadge(r) : '') + '</td></tr>';
     }).join('') + '</tbody>' : '<tbody><tr><td>' + emptyMascot('ไม่มีผู้รับบริการในวันที่เลือก', 'boySport') + '</td></tr></tbody>';
 
   // supplies used
@@ -3251,10 +3412,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
   $('recForm').addEventListener('submit', function(e){ e.preventDefault(); save(); });
   $('btnClear').addEventListener('click', function(){ clearForm(); });
-  $('btnPrint').addEventListener('click', function(){ var o = readForm(); o.triage = $('triLive').getAttribute('data-lv'); o.symptomGroup = o.symptomGroup || classify(o); printRecord(o); });
+  $('btnPrint').addEventListener('click', function(){ var o = readForm(), P = profile(); if (!o.recordedByName){ o.recordedByName = P.name; o.recorderRole = P.role; o.recorderContact = contactOf(P); } o.triage = $('triLive').getAttribute('data-lv'); o.symptomGroup = o.symptomGroup || classify(o); printRecord(o); });
 
   $('q').addEventListener('input', renderTable);
-  ['fDate','fGroup','fTri','fSource'].forEach(function(id){ $(id).addEventListener('change', renderTable); });
+  ['fDate','fGroup','fTri','fSource','fComplete'].forEach(function(id){ $(id).addEventListener('change', renderTable); });
+  $('fRecorder').addEventListener('change', function(){ renderTable(); renderRecSum(); });
   $('btnReload').addEventListener('click', function(){ loadRecords(); });
   $('btnCsv').addEventListener('click', exportCsv);
   $('sSave').addEventListener('click', saveSettingsForm);
@@ -3608,7 +3770,7 @@ function initAssist(){
    =================================================================== */
 var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 var MIC = { rec:null, el:null, btn:null, base:'' };
-var MIC_FIELDS = ['name','surname','sport','team','mechanism','injurySite','referTo','servicePoint','examiner','recordedByName'];
+var MIC_FIELDS = ['name','surname','sport','team','mechanism','injurySite','referTo','servicePoint','examiner','pName'];
 
 function initMic(){
   var banner = document.createElement('div'); banner.id = 'micBanner'; banner.hidden = true;
