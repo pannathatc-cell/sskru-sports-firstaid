@@ -1029,6 +1029,49 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
 #recSum tr[data-who]{cursor:pointer}
 #recSum tr[data-who]:hover td{background:var(--brand-050)}
 #recSum tr.sel td{background:var(--brand-100)}
+
+/* ---------- roles ---------- */
+body:not(.is-admin) .adm-only{display:none!important}
+body.is-admin .usr-only{display:none!important}
+.adm-badge{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:999px;background:#d03b3b;color:#fff;font-size:11.5px;font-weight:700;border:1px solid rgba(255,255,255,.35)}
+.adm-badge[hidden]{display:none}
+.adm-state{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.adm-state .mascot{width:84px}
+.adm-state h3{margin:0;font-size:16px;color:var(--ink-900)}
+.adm-state p{margin:3px 0 0;font-size:12.5px;color:var(--ink-500)}
+.adm-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:14px}
+.adm-form .field{flex:1 1 200px}
+.perm-tbl td:nth-child(2),.perm-tbl td:nth-child(3){font-size:12.5px}
+.req-box{margin-top:14px;border:1.5px dashed var(--gold-500);background:var(--gold-100);border-radius:var(--r-md);padding:12px 14px}
+html[data-theme="dark"] .req-box{background:var(--surface-3)}
+.req-box h5{margin:0 0 8px;font-size:13px;color:var(--gold-600)}
+.req-box textarea{min-height:64px;background:var(--surface)}
+.req-tag{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 8px;border-radius:999px;white-space:nowrap}
+.req-tag.pending{background:#fdf3dc;color:#7a5600}.req-tag.approved{background:#e4f5e4;color:#0a6b0a}
+.req-tag.rejected{background:#fbe7e7;color:#98211f}.req-tag.done{background:#e8f0fe;color:#1f6feb}
+.unl{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 8px;border-radius:999px;background:#e8f0fe;color:#1f6feb;margin-top:3px}
+
+/* ---------- in-page camera ---------- */
+.cam-big{font-size:15px;padding:13px 22px}
+.ph-alt{font-size:11.5px;color:var(--ink-400)}
+.cam-modal{max-width:720px;background:#0b0f0d}
+.cam-body{position:relative;background:#000;display:flex;align-items:center;justify-content:center;min-height:300px}
+.cam-body video{display:block;width:100%;max-height:62vh;object-fit:contain;background:#000}
+.cam-body video.mirror{transform:scaleX(-1)}
+.cam-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .25s}
+.cam-flash.on{opacity:.85;transition:none}
+.cam-msg{position:absolute;left:0;right:0;bottom:12px;margin:0;text-align:center;color:#fff;font-size:13px;text-shadow:0 1px 3px #000;padding:0 14px}
+.cam-msg:empty{display:none}
+.cam-strip{position:absolute;left:10px;top:10px;display:flex;gap:6px}
+.cam-strip img{width:54px;height:40px;object-fit:cover;border-radius:6px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.cam-ctrl{display:flex;align-items:center;justify-content:space-around;padding:14px 10px 18px;background:#0b0f0d}
+.cam-side{appearance:none;border:0;background:rgba(255,255,255,.12);color:#fff;border-radius:16px;padding:9px 14px;font-family:inherit;font-size:20px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:92px}
+.cam-side span{font-size:11.5px;font-weight:600}
+.cam-shutter{appearance:none;width:74px;height:74px;border-radius:50%;border:5px solid #fff;background:#d03b3b;cursor:pointer;box-shadow:0 0 0 3px rgba(255,255,255,.25);transition:transform .1s}
+.cam-shutter:active{transform:scale(.92)}
+.cam-shutter[disabled]{opacity:.4}
+input[type=password],input[type=time]{width:100%;font-family:inherit;font-size:14.5px;color:var(--ink-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--r-md);padding:11px 13px;transition:var(--speed);outline:none}
+input[type=password]:focus,input[type=time]:focus{border-color:var(--brand-500);background:var(--surface);box-shadow:0 0 0 4px rgba(36,154,87,.14)}
 </style>
 </head>
 <body>
@@ -1046,6 +1089,7 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
       <button type="button" class="user-chip" id="userChip" title="ผู้บันทึกข้อมูล — กดเพื่อเปลี่ยน">
         <span class="av"><img id="userAv" alt=""></span><span id="userName">ระบุผู้บันทึก</span>
       </button>
+      <span class="adm-badge" id="admBadge" hidden>🛡 แอดมิน</span>
       <span class="conn" id="connBadge" title="สถานะการเชื่อมต่อ Google Sheet">
         <span class="dot"></span><span id="connTxt">กำลังเชื่อมต่อ…</span>
       </span>
@@ -1081,6 +1125,10 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
     <button class="tab" data-tab="audit">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
       บันทึกการใช้งาน
+    </button>
+    <button class="tab" data-tab="admin">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>
+      แอดมิน <span class="pill red" id="reqPill" hidden>0</span>
     </button>
     <button class="tab" data-tab="settings">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -1211,9 +1259,9 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
           <input type="file" id="phCam" accept="image/*" capture="environment" hidden>
           <input type="file" id="phPick" accept="image/*,application/pdf" multiple hidden>
           <div class="ph-bar">
-            <button type="button" class="btn btn-gold" id="phCamBtn">📷 ถ่ายภาพ (กล้อง)</button>
-            <button type="button" class="btn btn-ghost" id="phPickBtn">🖼 แนบไฟล์ / เลือกรูปจากเครื่อง</button>
-            <span class="ph-note">ระบบย่อขนาดรูปอัตโนมัติก่อนอัปโหลด · ถ่ายเฉพาะส่วนที่จำเป็น หลีกเลี่ยงใบหน้า เพื่อรักษาความลับผู้รับบริการ</span>
+            <button type="button" class="btn btn-gold cam-big" id="phCamBtn">📷 เปิดกล้องถ่ายภาพ</button>
+            <span class="ph-note">ถ่ายจากกล้องได้ทันทีในหน้าเว็บ (ถ่ายได้หลายภาพต่อเนื่อง) · ระบบย่อขนาดและอัปโหลดอัตโนมัติ · ถ่ายเฉพาะส่วนที่จำเป็น หลีกเลี่ยงใบหน้า เพื่อรักษาความลับผู้รับบริการ
+              <br><a href="#" id="phPickBtn" class="ph-alt">หรือแนบไฟล์ PDF / รูปจากเครื่อง (ถ้าจำเป็น)</a></span>
           </div>
           <div class="ph-grid" id="phGrid"></div>
         </div>
@@ -1499,7 +1547,7 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
     <select id="skCat"><option value="">ทุกหมวด</option><option>ยา</option><option>เวชภัณฑ์</option><option>อุปกรณ์</option></select>
     <select id="skSt"><option value="">ทุกสถานะ</option><option value="low">ต่ำกว่าจุดสั่งซื้อ/หมด</option><option value="exp">ใกล้หมดอายุ</option><option value="off">ปิดใช้งาน</option></select>
     <button class="btn btn-primary btn-sm" id="skNew">＋ เพิ่มรายการใหม่</button>
-    <button class="btn btn-gold btn-sm" id="skCount">✓ ตรวจนับ / เช็คอุปกรณ์</button>
+    <button class="btn btn-gold btn-sm adm-only" id="skCount">✓ ตรวจนับ / เช็คอุปกรณ์</button>
     <button class="btn btn-ghost btn-sm" id="skPrint">🖨 ใบตรวจนับ</button>
     <button class="btn btn-ghost btn-sm" id="skReload">⟳</button>
   </div>
@@ -1526,8 +1574,46 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
   </div>
   <p class="prov-note">ทุกการเพิ่ม แก้ไข ลบ รับเข้า/ตรวจนับคลัง และการพิมพ์รายงาน ถูกบันทึกในชีต <b>AuditLog</b> พร้อมเวลา บัญชี Google และชื่อผู้บันทึก — ลบไม่ได้จากหน้าเว็บ เพื่อให้ตรวจสอบย้อนหลังได้</p>
   <div class="tbl-box" id="auTable"></div>
-  <div class="card"><div class="card-hd"><div class="step orange">↺</div><h2>บันทึกที่ถูกลบ (กู้คืนได้)<span class="sub">SOFT-DELETED RECORDS</span></h2></div>
+</section>
+
+<!-- ============ PANEL : ADMIN ============ -->
+<section class="panel" id="panel-admin">
+  <div class="card">
+    <div class="card-hd"><div class="step">🛡</div><h2>ผู้ดูแลระบบ (แอดมิน)<span class="sub">ADMINISTRATOR · สิทธิ์ลบ / แก้ไข / อนุมัติคำขอ</span></h2></div>
+    <div class="card-bd" id="admBox"></div>
+  </div>
+  <div class="card adm-only">
+    <div class="card-hd"><div class="step orange">✉</div><h2>คำขอแก้ไข / ลบ ที่รออนุมัติ<span class="sub">PENDING REQUESTS</span></h2></div>
+    <div class="card-bd" style="padding:0"><div style="overflow:auto" id="reqPending"></div></div>
+  </div>
+  <div class="card adm-only">
+    <div class="card-hd"><div class="step gold">🔓</div><h2>เปิดสิทธิ์แก้ไขบันทึกโดยตรง<span class="sub">UNLOCK A RECORD FOR EDITING</span></h2></div>
+    <div class="card-bd"><div class="grid">
+      <div class="field c5"><label class="lb" for="ulId">รหัสบันทึก</label><input type="text" id="ulId" placeholder="เช่น FA-261125-003"></div>
+      <div class="field c3"><label class="lb" for="ulHrs">ระยะเวลา</label><select id="ulHrs"><option value="2">2 ชั่วโมง</option><option value="8">8 ชั่วโมง</option><option value="24" selected>24 ชั่วโมง</option><option value="72">3 วัน</option></select></div>
+      <div class="field c4" style="justify-content:flex-end"><button class="btn btn-primary" id="ulGo">🔓 เปิดสิทธิ์ให้ผู้ใช้แก้ไข</button></div>
+    </div></div>
+  </div>
+  <div class="card adm-only"><div class="card-hd"><div class="step orange">↺</div><h2>บันทึกที่ถูกลบ (กู้คืนได้)<span class="sub">SOFT-DELETED RECORDS</span></h2></div>
     <div class="card-bd" style="padding:0"><div id="delTable"></div></div></div>
+  <div class="card">
+    <div class="card-hd"><div class="step gold">☰</div><h2>ประวัติคำขอทั้งหมด<span class="sub">REQUEST HISTORY</span></h2></div>
+    <div class="card-bd" style="padding:0"><div style="overflow:auto" id="reqHist"></div></div>
+  </div>
+  <div class="card">
+    <div class="card-hd"><div class="step">ⓘ</div><h2>สิทธิ์การใช้งาน<span class="sub">PERMISSIONS</span></h2></div>
+    <div class="card-bd" style="padding:0"><table class="tbl-plain perm-tbl">
+      <thead><tr><th>การใช้งาน</th><th>ผู้ใช้ทั่วไป</th><th>แอดมิน</th></tr></thead><tbody>
+      <tr><td>บันทึกผู้รับบริการใหม่ · ถ่ายภาพ · ดูประวัติ/แดชบอร์ด/รายงาน · พิมพ์</td><td>✅</td><td>✅</td></tr>
+      <tr><td>แก้ไขบันทึกที่บันทึกแล้ว</td><td>❌ ส่งคำขอ → ✅ เมื่อแอดมินอนุมัติ (24 ชม.)</td><td>✅</td></tr>
+      <tr><td>ลบบันทึก / กู้คืนบันทึก</td><td>❌ ส่งคำขอลบได้</td><td>✅</td></tr>
+      <tr><td>รับเข้าเวชภัณฑ์ · เพิ่มรายการคลังใหม่</td><td>✅</td><td>✅</td></tr>
+      <tr><td>แก้ไขรายการคลัง · เบิกออก/ปรับยอด · ตรวจนับ</td><td>❌</td><td>✅</td></tr>
+      <tr><td>แก้ไขการตั้งค่า · อนุมัติคำขอ · ลบรูปที่บันทึกแล้ว</td><td>❌</td><td>✅</td></tr>
+      </tbody></table>
+      <p class="prov-note" style="margin:10px 14px 14px">ระบบตรวจสิทธิ์ที่เซิร์ฟเวอร์ (Google Apps Script) ทุกครั้ง — การซ่อนปุ่มในหน้าเว็บเป็นเพียงความสะดวก ผู้ใช้ทั่วไปจึงไม่สามารถลบหรือแก้ไขข้อมูลโดยการเลี่ยงหน้าเว็บได้</p>
+    </div>
+  </div>
 </section>
 
 <!-- ============ PANEL : SETTINGS ============ -->
@@ -1547,7 +1633,7 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
       <div class="field c6"><label class="lb" for="sPoints">จุดให้บริการ</label><textarea id="sPoints"></textarea></div>
       <div class="field c6"><label class="lb" for="sRefer">สถานที่ส่งต่อ</label><textarea id="sRefer"></textarea></div>
     </div>
-    <div style="margin-top:15px;display:flex;gap:9px;justify-content:flex-end"><button class="btn btn-primary" id="sSave">บันทึกการตั้งค่า</button></div>
+    <div style="margin-top:15px;display:flex;gap:9px;justify-content:flex-end;align-items:center"><span class="usr-only prov-note" style="margin:0">🔒 การแก้ไขการตั้งค่าสำหรับแอดมินเท่านั้น</span><button class="btn btn-primary adm-only" id="sSave">บันทึกการตั้งค่า</button></div>
   </div></div>
   <div class="card"><div class="card-hd"><div class="step orange">i</div><h2>ข้อมูลระบบ<span class="sub">SYSTEM</span></h2></div>
     <div class="card-bd"><dl class="dl" id="sysInfo"></dl>
@@ -1568,7 +1654,10 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
     <div class="modal-hd"><h3 id="mTitle">รายละเอียดบันทึก</h3><button class="x" id="mClose">✕</button></div>
     <div class="modal-bd" id="mBody"></div>
     <div class="modal-ft">
-      <button class="btn btn-danger btn-sm" id="mDelete">🗑 ลบ</button>
+      <button class="btn btn-danger btn-sm adm-only" id="mDelete">🗑 ลบ</button>
+      <button class="btn btn-ghost btn-sm adm-only" id="mUnlock">🔓 เปิดสิทธิ์แก้ไข 24 ชม.</button>
+      <button class="btn btn-ghost btn-sm usr-only" id="mReqDel">✉ ขอลบ</button>
+      <button class="btn btn-ghost btn-sm" id="mReqEdit">✉ ขอแก้ไข</button>
       <button class="btn btn-ghost btn-sm" id="mSpeak">🔊 อ่านออกเสียง</button>
       <button class="btn btn-ghost btn-sm" id="mPrint">🖨 พิมพ์ / PDF</button>
       <button class="btn btn-gold btn-sm" id="mEdit">✎ แก้ไข</button>
@@ -1605,6 +1694,24 @@ html[data-theme="dark"] .inc.ok{background:#122b12;color:#7fdc7f}
   </div>
 </div>
 
+<!-- ============ MODAL : CAMERA ============ -->
+<div class="overlay" id="ovCam">
+  <div class="modal cam-modal">
+    <div class="modal-hd"><h3>📷 ถ่ายภาพประกอบบันทึก</h3><button class="x" id="camClose">✕</button></div>
+    <div class="cam-body">
+      <video id="camVideo" playsinline autoplay muted></video>
+      <div class="cam-flash" id="camFlash"></div>
+      <p class="cam-msg" id="camMsg">กำลังเปิดกล้อง… (ถ้าเบราว์เซอร์ถาม ให้กด “อนุญาต”)</p>
+      <div class="cam-strip" id="camStrip"></div>
+    </div>
+    <div class="cam-ctrl">
+      <button type="button" class="cam-side" id="camFlip">🔄<span>สลับกล้อง</span></button>
+      <button type="button" class="cam-shutter" id="camShot" aria-label="ถ่ายภาพ"></button>
+      <button type="button" class="cam-side" id="camDone">✓<span>เสร็จ (<b id="camCount">0</b>)</span></button>
+    </div>
+  </div>
+</div>
+
 <div id="vizTip" hidden></div>
 <div id="toast"></div>
 <div id="loader"><div class="spin"></div></div>
@@ -1620,7 +1727,7 @@ var API_URL = 'https://script.google.com/macros/s/AKfycbwqc3dKU56cz-ZZ_KOmt8envI
   function setPin(p){ try { localStorage.setItem('fa_pin', p); } catch (e){} window.__pin = p; }
   function post(fn, args){
     return fetch(API_URL, { method:'POST', redirect:'follow', headers:{ 'Content-Type':'text/plain;charset=utf-8' },
-      body:JSON.stringify({ fn:fn, args:args, pin:getPin() }) }).then(function(r){ return r.json(); });
+      body:JSON.stringify({ fn:fn, args:args, pin:getPin(), token:(function(){ try { return localStorage.getItem('fa_admin_token') || ''; } catch (e){ return ''; } })() }) }).then(function(r){ return r.json(); });
   }
   var waiting = [];
   function askPin(msg){
@@ -2290,7 +2397,7 @@ function initConnection(){
       applySettings(c.settings || {});
       renderGroupPick(); fillGroupSelects();
       updateTriageLive(); renderSysInfo();
-      loadRecords(true); loadSupplies(true); loadPhotos();
+      loadRecords(true); loadSupplies(true); loadPhotos(); loadAdmin();
     } else {
       b.className = 'conn bad'; $('connTxt').textContent = 'เชื่อมต่อชีตไม่ได้';
       toast((c && c.message) || 'เชื่อมต่อ Google Sheet ไม่สำเร็จ', 'err');
@@ -2703,7 +2810,8 @@ function renderTable(){
       '<td style="max-width:170px;font-size:12.5px">' + esc(r.disposition || '-') + '</td>' +
       '<td class="rec-who">' + esc(r.recordedByName || 'ไม่ระบุ') + '<small>' + esc(r.recorderRole || '') + (r.updatedBy && r.updatedBy !== r.recordedByName ? ' · แก้ไขโดย ' + esc(r.updatedBy) : '') + '</small>' + incBadge(r) + '</td>' +
       '<td><div class="row-act" style="justify-content:flex-end"><button class="btn btn-ghost btn-sm" data-act="view">ดู</button>' +
-      '<button class="btn btn-gold btn-sm" data-act="edit">แก้ไข</button></div></td></tr>';
+      (canEdit(r.id) ? '<button class="btn btn-gold btn-sm" data-act="edit">แก้ไข</button>' : '') + '</div>' +
+      (!STATE.admin && isUnlocked(r.id) ? '<span class="unl">🔓 แก้ไขได้ถึง ' + esc(unlockUntilOf(r.id).slice(11, 16)) + '</span>' : '') + '</td></tr>';
   });
   w.innerHTML = h + '</tbody></table>';
   w.querySelectorAll('tbody tr').forEach(function(tr){
@@ -2717,6 +2825,7 @@ function renderTable(){
 function byId(id){ return STATE.rows.filter(function(r){ return r.id === id; })[0]; }
 function editRecord(id){
   var r = byId(id); if (!r) return;
+  if (!canEdit(id)){ toast('ผู้ใช้ทั่วไปแก้ไขบันทึกไม่ได้ — กด “ขอแก้ไข” เพื่อส่งคำขอให้แอดมินอนุมัติ', 'warn'); openModal(id); return; }
   fillForm(r); closeModal(); switchTab('form');
   window.scrollTo({ top:0, behavior:'smooth' });
   toast('เปิดบันทึกเพื่อแก้ไข: ' + id + ' — แก้ไขรายการเวชภัณฑ์ได้ ระบบจะปรับยอดคลังตามส่วนต่าง', 'warn');
@@ -2786,6 +2895,7 @@ function openModal(id){
   h += '</dl>' + galleryHtml(photosOf(id)) + '<div class="hist" id="mHist"><h5>ประวัติการเปลี่ยนแปลง (Audit trail)</h5><ul><li>กำลังโหลด…</li></ul></div>';
   $('mBody').innerHTML = h;
   $('ov').classList.add('on');
+  if (typeof paintModalButtons === 'function') paintModalButtons(r);
   var paint = function(){
     var list = STATE.audit.filter(function(a){ return a.refId === id; });
     $('mHist').innerHTML = '<h5>ประวัติการเปลี่ยนแปลง (Audit trail)</h5><ul>' + (list.length ? list.map(function(a){
@@ -2794,7 +2904,7 @@ function openModal(id){
   };
   if (STATE.auditLoaded) paint(); else loadAudit(true, paint);
 }
-function closeModal(){ $('ov').classList.remove('on'); resetDelBtn(); try { speechSynthesis.cancel(); } catch (e){} }
+function closeModal(){ var rb = $('reqBox'); if (rb) rb.remove(); $('ov').classList.remove('on'); resetDelBtn(); try { speechSynthesis.cancel(); } catch (e){} }
 var delArm = false, delTimer = null;
 function resetDelBtn(){ delArm = false; $('mDelete').innerHTML = '🗑 ลบ'; }
 function removeRecord(id){
@@ -3207,7 +3317,7 @@ function renderStock(){
             : '<td class="n">' + (used[it.itemId] ? nf(Math.round(used[it.itemId] * 10) / 10) : '–') + '</td><td>' + esc(it.expiry ? thDate(it.expiry) : '–') + '</td><td>' + esc(it.location || '–') + '</td>' +
               '<td><span class="st ' + s.k + '">' + esc(s.t) + '</span></td>' +
               '<td><div class="row-act" style="justify-content:flex-end"><button class="btn btn-primary btn-sm" data-m="in">＋ รับเข้า</button>' +
-              '<button class="btn btn-ghost btn-sm" data-m="out">− เบิก/ปรับ</button><button class="btn btn-ghost btn-sm" data-m="edit">แก้ไข</button></div></td>') + '</tr>';
+              '<button class="btn btn-ghost btn-sm adm-only" data-m="out">− เบิก/ปรับ</button><button class="btn btn-ghost btn-sm adm-only" data-m="edit">แก้ไข</button></div></td>') + '</tr>';
       }).join('') + '</tbody></table>';
     $('skTable').querySelectorAll('[data-m]').forEach(function(b){
       b.addEventListener('click', function(){ openSupModal(b.getAttribute('data-m'), itemById(b.closest('tr').getAttribute('data-id'))); });
@@ -3329,7 +3439,7 @@ function loadAudit(quiet, cb){
     if (isActive('audit')) renderAudit();
     if (cb) cb();
   }, quiet);
-  if (!cb) call('listDeleted', [], function(res){ STATE.deleted = (res && res.rows) || []; if (isActive('audit')) renderDeleted(); }, true);
+  if (!cb && STATE.admin) call('listDeleted', [], function(res){ STATE.deleted = (res && res.rows) || []; if (isActive('audit')) renderDeleted(); }, true);
 }
 function aTag(a){
   var k = /เพิ่ม|กู้คืน/.test(a) ? 'add' : /แก้ไข/.test(a) ? 'edit' : /ลบ|ปิดใช้งาน/.test(a) ? 'del' : /รับเข้า|เบิก|ปรับยอด|ตรวจนับ/.test(a) ? 'stock' : /ตั้งค่า|พิมพ์/.test(a) ? 'cfg' : '';
@@ -3378,7 +3488,8 @@ function switchTab(name){
   if (name === 'dash') renderDashboard();
   if (name === 'daily') renderDaily();
   if (name === 'stock') renderStock();
-  if (name === 'audit'){ renderAudit(); renderDeleted(); loadAudit(true); }
+  if (name === 'audit'){ renderAudit(); loadAudit(true); }
+  if (name === 'admin'){ renderAdmin(); loadRequests(); if (STATE.admin) afterRoleChange(); }
   if (name === 'settings'){ renderSettingsForm(); renderSysInfo(); }
   lsSet('fa_tab', name);
 }
@@ -3389,7 +3500,7 @@ document.addEventListener('DOMContentLoaded', function(){
   $('examDate').value = todayStr(); $('arriveTime').value = nowTime();
   fillSelect('disposition', DISPOSITIONS, '— เลือก —'); setDatalist('dlMech', MECHANISMS);
   renderSupList(); setPain('');
-  initIdentity(); initConnection(); initDashboard(); initDaily(); initStock(); initAudit(); initAssist(); initMic(); initPhotos();
+  initIdentity(); initConnection(); initDashboard(); initDaily(); initStock(); initAudit(); initAssist(); initMic(); initPhotos(); initAdmin();
 
   document.querySelectorAll('.tab').forEach(function(t){ t.addEventListener('click', function(){ switchTab(t.dataset.tab); }); });
   $('btnTheme').addEventListener('click', function(){
@@ -3433,7 +3544,7 @@ document.addEventListener('DOMContentLoaded', function(){
     clearTimeout(delTimer); resetDelBtn(); removeRecord(STATE.current.id);
   });
   document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape'){ closeModal(); closeSup(); micStop(); }
+    if (e.key === 'Escape'){ closeModal(); closeSup(); micStop(); if ($('ovCam').classList.contains('on')) closeCam(); }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's' && isActive('form')){ e.preventDefault(); save(); }
   });
 });
@@ -3888,17 +3999,68 @@ function addFiles(files){
       return loadImg(url).then(function(im){
         return { data:scaleTo(im, 1600, 0.82), thumb:scaleTo(im, 260, 0.7), mime:'image/jpeg', name:file.name.replace(/\.\w+$/, '') + '.jpg' };
       });
-    }).then(function(x){
-      tmp.thumb = x.thumb; renderPhotoGrid();
-      call('uploadPhoto', [{ data:x.data.split(',')[1], mime:x.mime, name:x.name, thumb:x.thumb, caption:'', recordId:$('fId').value }, who], function(res){
-        tmp.uploading = false;
-        if (res && res.ok){ Object.assign(tmp, res.photo); STATE.photos.push(res.photo); toast('แนบไฟล์แล้ว: ' + file.name); }
-        else { tmp.error = true; toast((res && res.message) || 'อัปโหลดไม่สำเร็จ', 'err'); }
-        renderPhotoGrid();
-      }, true);
-    }).catch(function(){ tmp.uploading = false; tmp.error = true; renderPhotoGrid(); toast('อ่านไฟล์ไม่ได้: ' + file.name, 'err'); });
+    }).then(function(x){ startUpload(tmp, x, who); }).catch(function(){ tmp.uploading = false; tmp.error = true; renderPhotoGrid(); toast('อ่านไฟล์ไม่ได้: ' + file.name, 'err'); });
   });
 }
+function startUpload(tmp, x, who){
+  tmp.thumb = x.thumb; renderPhotoGrid();
+  call('uploadPhoto', [{ data:x.data.split(',')[1], mime:x.mime, name:x.name, thumb:x.thumb, caption:'', recordId:$('fId').value }, who], function(res){
+    tmp.uploading = false;
+    if (res && res.ok){ Object.assign(tmp, res.photo); STATE.photos.push(res.photo); toast('อัปโหลดภาพแล้ว: ' + x.name); }
+    else { tmp.error = true; toast((res && res.message) || 'อัปโหลดไม่สำเร็จ', 'err'); }
+    renderPhotoGrid();
+  }, true);
+}
+
+/* ---------- 📷 กล้องในหน้าเว็บ (getUserMedia) ---------- */
+var CAM = { stream:null, facing:'environment', shots:0 };
+function camSupported(){ return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
+function openCam(){
+  if (!camSupported()){
+    toast('เบราว์เซอร์นี้เปิดกล้องในหน้าเว็บไม่ได้ — จะเปิดกล้องของเครื่องแทน', 'warn');
+    $('phCam').click(); return;
+  }
+  CAM.shots = 0; $('camCount').textContent = '0'; $('camStrip').innerHTML = '';
+  $('ovCam').classList.add('on'); startCam();
+}
+function startCam(){
+  stopCam();
+  $('camMsg').textContent = 'กำลังเปิดกล้อง… (ถ้าเบราว์เซอร์ถาม ให้กด “อนุญาต”)'; $('camShot').disabled = true;
+  navigator.mediaDevices.getUserMedia({ audio:false, video:{ facingMode:{ ideal:CAM.facing }, width:{ ideal:1920 }, height:{ ideal:1080 } } })
+    .then(function(s){
+      CAM.stream = s; var v = $('camVideo');
+      v.srcObject = s; v.classList.toggle('mirror', CAM.facing === 'user');
+      var p = v.play(); if (p && p.catch) p.catch(function(){});
+      $('camMsg').textContent = ''; $('camShot').disabled = false;
+    })
+    .catch(function(e){
+      var n = e && e.name, msg = n === 'NotAllowedError' ? 'ไม่ได้รับอนุญาตให้ใช้กล้อง — กดไอคอนกล้อง/แม่กุญแจที่แถบที่อยู่ แล้วเลือก “อนุญาต” จากนั้นกดสลับกล้องอีกครั้ง'
+        : n === 'NotFoundError' || n === 'OverconstrainedError' ? 'ไม่พบกล้องในอุปกรณ์นี้' : n === 'NotReadableError' ? 'กล้องถูกใช้งานโดยแอปอื่นอยู่ — ปิดแอปนั้นแล้วลองใหม่' : 'เปิดกล้องไม่ได้ (' + (n || e) + ')';
+      if ((n === 'OverconstrainedError') && CAM.facing === 'environment'){ CAM.facing = 'user'; startCam(); return; }
+      $('camMsg').textContent = msg;
+    });
+}
+function stopCam(){ if (CAM.stream){ CAM.stream.getTracks().forEach(function(t){ t.stop(); }); CAM.stream = null; } var v = $('camVideo'); if (v) v.srcObject = null; }
+function closeCam(){ stopCam(); $('ovCam').classList.remove('on'); if (CAM.shots) toast('ถ่ายภาพแล้ว ' + CAM.shots + ' ภาพ — กำลังอัปโหลดอัตโนมัติ'); }
+function snapCam(){
+  var v = $('camVideo'); if (!CAM.stream || !v.videoWidth){ toast('กล้องยังไม่พร้อม', 'warn'); return; }
+  var max = 1600, r = Math.min(1, max / Math.max(v.videoWidth, v.videoHeight));
+  var c = document.createElement('canvas'); c.width = Math.round(v.videoWidth * r); c.height = Math.round(v.videoHeight * r);
+  c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+  var t = document.createElement('canvas'), tr = 260 / Math.max(c.width, c.height); t.width = Math.round(c.width * tr); t.height = Math.round(c.height * tr);
+  t.getContext('2d').drawImage(c, 0, 0, t.width, t.height);
+  var d = new Date(), stamp = todayStr().replace(/-/g, '') + '-' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  var x = { data:c.toDataURL('image/jpeg', 0.85), thumb:t.toDataURL('image/jpeg', 0.7), mime:'image/jpeg', name:'camera-' + stamp + '.jpg' };
+  var f = $('camFlash'); f.classList.add('on'); setTimeout(function(){ f.classList.remove('on'); }, 60);
+  if (navigator.vibrate) try { navigator.vibrate(30); } catch (e){}
+  CAM.shots++; $('camCount').textContent = CAM.shots;
+  var im = document.createElement('img'); im.src = x.thumb; $('camStrip').insertBefore(im, $('camStrip').firstChild);
+  while ($('camStrip').children.length > 4) $('camStrip').lastChild.remove();
+  var tmp = { tmpId:'c' + Date.now(), name:x.name, mime:x.mime, thumb:x.thumb, caption:'', uploading:true };
+  STATE.formPhotos.push(tmp);
+  startUpload(tmp, x, $('recordedByName').value.trim());
+}
+
 function renderPhotoGrid(){
   var g = $('phGrid'); if (!g) return;
   $('fPhotoIds').value = STATE.formPhotos.filter(function(p){ return p.photoId; }).map(function(p){ return p.photoId; }).join(',');
@@ -3910,6 +4072,7 @@ function renderPhotoGrid(){
   }).join('');
   g.querySelectorAll('[data-rm]').forEach(function(b){ b.addEventListener('click', function(){
     var p = STATE.formPhotos[+b.getAttribute('data-rm')];
+    if (p.recordId && !STATE.admin){ toast('รูปที่บันทึกกับบันทึกแล้ว ลบได้เฉพาะแอดมิน — ส่งคำขอแก้ไขแทน', 'warn'); return; }
     STATE.formPhotos.splice(+b.getAttribute('data-rm'), 1); renderPhotoGrid();
     if (p.photoId){ STATE.photos = STATE.photos.filter(function(x){ return x.photoId !== p.photoId; });
       call('removePhoto', [p.photoId, $('recordedByName').value.trim()], function(res){ if (res && res.ok) toast(res.message); }, true); }
@@ -3932,10 +4095,178 @@ function galleryHtml(list){
   }).join('') + '</div></div>';
 }
 function initPhotos(){
-  $('phCamBtn').addEventListener('click', function(){ $('phCam').click(); });
-  $('phPickBtn').addEventListener('click', function(){ $('phPick').click(); });
+  $('phCamBtn').addEventListener('click', openCam);
+  $('phPickBtn').addEventListener('click', function(e){ e.preventDefault(); $('phPick').click(); });
+  $('camShot').addEventListener('click', snapCam);
+  $('camFlip').addEventListener('click', function(){ CAM.facing = CAM.facing === 'environment' ? 'user' : 'environment'; startCam(); });
+  $('camDone').addEventListener('click', closeCam);
+  $('camClose').addEventListener('click', closeCam);
+  document.addEventListener('visibilitychange', function(){ if (document.hidden && CAM.stream) closeCam(); });
   ['phCam','phPick'].forEach(function(id){ $(id).addEventListener('change', function(){ addFiles($(id).files); $(id).value = ''; }); });
   renderPhotoGrid();
+}
+
+
+/* ===================================================================
+   ADMIN / PERMISSIONS — เซิร์ฟเวอร์เป็นผู้ตรวจสิทธิ์จริง หน้าเว็บแค่ซ่อน/แสดงปุ่ม
+   =================================================================== */
+STATE.admin = false; STATE.admConfigured = true; STATE.requests = []; STATE.reqNow = '';
+function admToken(){ return lsGet('fa_admin_token'); }
+function nowStamp(){ var d = new Date(); return todayStr() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+function isUnlocked(id){
+  var n = nowStamp();
+  return STATE.requests.some(function(r){ return r.recordId === id && r.type === 'edit' && r.status === 'approved' && String(r.unlockUntil) >= n; });
+}
+function unlockUntilOf(id){
+  var n = nowStamp(), u = '';
+  STATE.requests.forEach(function(r){ if (r.recordId === id && r.type === 'edit' && r.status === 'approved' && String(r.unlockUntil) >= n && r.unlockUntil > u) u = r.unlockUntil; });
+  return u;
+}
+function canEdit(id){ return STATE.admin || isUnlocked(id); }
+function applyRole(){
+  document.body.classList.toggle('is-admin', !!STATE.admin);
+  $('admBadge').hidden = !STATE.admin;
+  renderAdmin();
+}
+function loadAdmin(){
+  call('adminStatus', [], function(res){
+    if (!res || !res.ok) return;
+    STATE.admConfigured = !!res.configured;
+    if (!res.admin && admToken()) lsSet('fa_admin_token', '');
+    STATE.admin = !!res.admin;
+    applyRole(); afterRoleChange();
+  }, true);
+  loadRequests();
+}
+function loadRequests(){
+  call('listRequests', [], function(res){
+    if (!res || !res.ok) return;
+    STATE.requests = res.rows || [];
+    var pend = STATE.requests.filter(function(r){ return r.status === 'pending'; }).length;
+    $('reqPill').hidden = !(pend && STATE.admin); $('reqPill').textContent = pend;
+    renderAdmin(); if (isActive('records')) renderTable();
+  }, true);
+}
+function afterRoleChange(){
+  if (isActive('records')) renderTable();
+  if (isActive('stock')) renderStock();
+  if (STATE.admin) call('listDeleted', [], function(res){ STATE.deleted = (res && res.rows) || []; renderDeleted(); }, true);
+  var pend = STATE.requests.filter(function(r){ return r.status === 'pending'; }).length;
+  $('reqPill').hidden = !(pend && STATE.admin); $('reqPill').textContent = pend;
+}
+function reqTag(s){
+  var t = { pending:'รออนุมัติ', approved:'อนุมัติแล้ว', rejected:'ไม่อนุมัติ', done:'ดำเนินการแล้ว' }[s] || s;
+  return '<span class="req-tag ' + esc(s) + '">' + esc(t) + '</span>';
+}
+function renderAdmin(){
+  var box = $('admBox'); if (!box) return;
+  var me = profile().name || '';
+  if (STATE.admin){
+    box.innerHTML = '<div class="adm-state"><img class="mascot" src="' + IMG.boy + '"><div><h3>🛡 คุณเข้าสู่ระบบในฐานะแอดมิน</h3>' +
+      '<p>ลบ/แก้ไข/กู้คืนบันทึก อนุมัติคำขอ และจัดการคลังได้ · สิทธิ์หมดอายุอัตโนมัติใน 6 ชั่วโมง · ใช้ในนาม <b>' + esc(me || '—') + '</b></p></div>' +
+      '<button class="btn btn-danger btn-sm" id="admOut" style="margin-left:auto">ออกจากโหมดแอดมิน</button></div>' +
+      '<div class="adm-form"><div class="field"><label class="lb" for="admOld">เปลี่ยนรหัส: รหัสเดิม</label><input type="password" id="admOld" autocomplete="current-password"></div>' +
+      '<div class="field"><label class="lb" for="admNew">รหัสใหม่ (≥ 6 ตัว)</label><input type="password" id="admNew" autocomplete="new-password"></div>' +
+      '<button class="btn btn-ghost" id="admChg">เปลี่ยนรหัสแอดมิน</button></div>';
+    $('admOut').addEventListener('click', function(){
+      call('adminLogout', [], function(){}, true);
+      lsSet('fa_admin_token', ''); STATE.admin = false; applyRole(); afterRoleChange(); toast('ออกจากโหมดแอดมินแล้ว');
+    });
+    $('admChg').addEventListener('click', function(){
+      call('adminChangePassword', [$('admOld').value, $('admNew').value, me], function(res){
+        toast((res && res.message) || 'ไม่สำเร็จ', res && res.ok ? '' : 'err'); if (res && res.ok){ $('admOld').value = ''; $('admNew').value = ''; }
+      });
+    });
+  } else if (!STATE.admConfigured){
+    box.innerHTML = '<div class="adm-state"><img class="mascot" src="' + IMG.boyV + '"><div><h3>ตั้งรหัสแอดมินครั้งแรก</h3>' +
+      '<p>ยังไม่มีแอดมินในระบบ — ผู้ที่ตั้งรหัสนี้จะเป็นแอดมิน (ทำครั้งเดียว) · เก็บรหัสไว้เป็นความลับ ระบบเก็บเฉพาะค่าแฮชของรหัส</p></div></div>' +
+      '<div class="adm-form"><div class="field"><label class="lb" for="admP1">รหัสแอดมิน (≥ 6 ตัว)</label><input type="password" id="admP1" autocomplete="new-password"></div>' +
+      '<div class="field"><label class="lb" for="admP2">ยืนยันรหัส</label><input type="password" id="admP2" autocomplete="new-password"></div>' +
+      '<button class="btn btn-primary" id="admSet">ตั้งรหัสและเป็นแอดมิน</button></div>';
+    $('admSet').addEventListener('click', function(){
+      if ($('admP1').value !== $('admP2').value){ toast('รหัสทั้งสองช่องไม่ตรงกัน', 'warn'); return; }
+      call('adminSetup', [$('admP1').value, me], admDone);
+    });
+  } else {
+    box.innerHTML = '<div class="adm-state"><img class="mascot" src="' + IMG.boyV + '"><div><h3>คุณใช้งานในฐานะผู้ใช้ทั่วไป</h3>' +
+      '<p>บันทึกผู้รับบริการใหม่ได้ · การแก้ไข/ลบ ให้ส่งคำขอจากหน้ารายละเอียดบันทึก แล้วรอแอดมินอนุมัติ</p></div></div>' +
+      '<div class="adm-form"><div class="field"><label class="lb" for="admPw">รหัสแอดมิน</label><input type="password" id="admPw" autocomplete="current-password"></div>' +
+      '<button class="btn btn-primary" id="admIn">เข้าสู่ระบบแอดมิน</button></div>';
+    $('admIn').addEventListener('click', function(){ call('adminLogin', [$('admPw').value, me], admDone); });
+    $('admPw').addEventListener('keydown', function(e){ if (e.key === 'Enter') $('admIn').click(); });
+  }
+  // requests
+  var pend = STATE.requests.filter(function(r){ return r.status === 'pending'; });
+  $('reqPending').innerHTML = pend.length ? '<table class="tbl-plain"><thead><tr><th>เวลา</th><th>บันทึก</th><th>ประเภท</th><th>เหตุผล</th><th>ผู้ขอ</th><th style="text-align:right">อนุมัติ</th></tr></thead><tbody>' +
+    pend.map(function(r){ var rec = byId(r.recordId);
+      return '<tr><td class="mono">' + esc(r.createdAt) + '</td><td><a href="#" data-open="' + esc(r.recordId) + '">' + esc(r.recordId) + '</a><div class="mono">' + esc(rec ? (rec.name || '') + ' ' + (rec.surname || '') : '') + '</div></td>' +
+        '<td>' + (r.type === 'delete' ? '🗑 ขอลบ' : '✎ ขอแก้ไข') + '</td><td style="font-size:12.5px">' + esc(r.reason) + '</td><td>' + esc(r.requester) + '<div class="mono">' + esc(r.contact || '') + '</div></td>' +
+        '<td><div class="row-act" style="justify-content:flex-end"><button class="btn btn-primary btn-sm" data-ok="' + esc(r.reqId) + '">อนุมัติ</button><button class="btn btn-ghost btn-sm" data-no="' + esc(r.reqId) + '">ไม่อนุมัติ</button></div></td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="empty-m"><p>✓ ไม่มีคำขอรออนุมัติ</p></div>';
+  $('reqHist').innerHTML = STATE.requests.length ? '<table class="tbl-plain"><thead><tr><th>เวลา</th><th>บันทึก</th><th>ประเภท</th><th>เหตุผล</th><th>ผู้ขอ</th><th>สถานะ</th><th>ผู้อนุมัติ / ถึงเวลา</th></tr></thead><tbody>' +
+    STATE.requests.slice(0, 100).map(function(r){
+      return '<tr><td class="mono">' + esc(r.createdAt) + '</td><td class="mono">' + esc(r.recordId) + '</td><td>' + (r.type === 'delete' ? 'ลบ' : 'แก้ไข') + '</td><td style="font-size:12.5px">' + esc(r.reason) +
+        '</td><td>' + esc(r.requester) + '</td><td>' + reqTag(r.status) + '</td><td style="font-size:12px">' + esc(r.decidedBy || '') + (r.unlockUntil ? '<div class="mono">แก้ไขได้ถึง ' + esc(r.unlockUntil) + '</div>' : '') + '</td></tr>';
+    }).join('') + '</tbody></table>' : '<div class="empty-m"><p>ยังไม่มีคำขอ</p></div>';
+  $('reqPending').querySelectorAll('[data-ok],[data-no]').forEach(function(b){
+    b.addEventListener('click', function(){
+      var id = b.getAttribute('data-ok') || b.getAttribute('data-no'), ok = b.hasAttribute('data-ok');
+      call('decideRequest', [id, ok ? 'approve' : 'reject', me, ''], function(res){
+        toast((res && res.message) || 'ไม่สำเร็จ', res && res.ok ? '' : 'err');
+        if (res && res.ok){ loadRequests(); loadRecords(true); loadSupplies(true); if (STATE.admin) afterRoleChange(); }
+      });
+    });
+  });
+  document.querySelectorAll('#panel-admin [data-open]').forEach(function(a){ a.addEventListener('click', function(e){ e.preventDefault(); openModal(a.getAttribute('data-open')); }); });
+}
+function admDone(res){
+  if (res && res.ok && res.token){
+    lsSet('fa_admin_token', res.token); STATE.admin = true; STATE.admConfigured = true;
+    applyRole(); afterRoleChange(); toast(res.message);
+  } else toast((res && res.message) || 'ไม่สำเร็จ', 'err');
+}
+/* ---- คำขอแก้ไข/ลบ จากหน้ารายละเอียดบันทึก ---- */
+function openReqBox(type){
+  var r = STATE.current; if (!r) return;
+  var P = profile(); if (!P.name){ openWho(); return; }
+  var old = $('reqBox'); if (old) old.remove();
+  var mine = STATE.requests.filter(function(q){ return q.recordId === r.id && q.status === 'pending' && q.type === type; });
+  var div = document.createElement('div'); div.className = 'req-box'; div.id = 'reqBox';
+  div.innerHTML = '<h5>' + (type === 'delete' ? '🗑 ขอลบบันทึก ' : '✎ ขอแก้ไขบันทึก ') + esc(r.id) + '</h5>' +
+    (mine.length ? '<p class="prov-note" style="margin:0 0 8px">มีคำขอประเภทนี้รออนุมัติอยู่แล้ว ' + mine.length + ' รายการ</p>' : '') +
+    '<textarea id="reqReason" placeholder="ระบุเหตุผล เช่น บันทึกอายุผิด ควรเป็น 21 ปี / บันทึกซ้ำกับ FA-xxxx"></textarea>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px"><button class="btn btn-ghost btn-sm" id="reqCancel">ยกเลิก</button><button class="btn btn-primary btn-sm" id="reqSend">ส่งคำขอถึงแอดมิน</button></div>';
+  $('mBody').insertBefore(div, $('mBody').firstChild);
+  $('mBody').scrollTop = 0; $('reqReason').focus();
+  $('reqCancel').addEventListener('click', function(){ div.remove(); });
+  $('reqSend').addEventListener('click', function(){
+    var reason = $('reqReason').value.trim(); if (!reason){ toast('กรุณาระบุเหตุผล', 'warn'); return; }
+    call('requestChange', [{ recordId:r.id, type:type, reason:reason, requester:P.name, contact:contactOf(P) }], function(res){
+      toast((res && res.message) || 'ไม่สำเร็จ', res && res.ok ? '' : 'err');
+      if (res && res.ok){ div.remove(); loadRequests(); }
+    });
+  });
+}
+function paintModalButtons(r){
+  var ed = canEdit(r.id);
+  $('mEdit').style.display = ed ? '' : 'none';
+  $('mReqEdit').style.display = ed ? 'none' : '';
+  var u = unlockUntilOf(r.id);
+  $('mEdit').innerHTML = '✎ แก้ไข' + (!STATE.admin && u ? ' (ได้ถึง ' + u.slice(11, 16) + ')' : '');
+}
+function initAdmin(){
+  $('mReqEdit').addEventListener('click', function(){ openReqBox('edit'); });
+  $('mReqDel').addEventListener('click', function(){ openReqBox('delete'); });
+  $('mUnlock').addEventListener('click', function(){
+    if (!STATE.current) return;
+    call('unlockRecord', [STATE.current.id, profile().name, 24], function(res){ toast((res && res.message) || 'ไม่สำเร็จ', res && res.ok ? '' : 'err'); if (res && res.ok) loadRequests(); });
+  });
+  $('ulGo').addEventListener('click', function(){
+    var id = $('ulId').value.trim(); if (!id){ toast('กรอกรหัสบันทึก', 'warn'); return; }
+    if (!byId(id)){ toast('ไม่พบรหัสบันทึกนี้', 'warn'); return; }
+    call('unlockRecord', [id, profile().name, +$('ulHrs').value], function(res){ toast((res && res.message) || 'ไม่สำเร็จ', res && res.ok ? '' : 'err'); if (res && res.ok){ $('ulId').value = ''; loadRequests(); } });
+  });
+  setInterval(function(){ if (hasGas()) loadRequests(); }, 120000);
 }
 
 </script>
