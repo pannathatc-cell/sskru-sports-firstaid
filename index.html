@@ -1072,6 +1072,15 @@ html[data-theme="dark"] .req-box{background:var(--surface-3)}
 .cam-shutter[disabled]{opacity:.4}
 input[type=password],input[type=time]{width:100%;font-family:inherit;font-size:14.5px;color:var(--ink-900);background:var(--surface-2);border:1.5px solid var(--line);border-radius:var(--r-md);padding:11px 13px;transition:var(--speed);outline:none}
 input[type=password]:focus,input[type=time]:focus{border-color:var(--brand-500);background:var(--surface);box-shadow:0 0 0 4px rgba(36,154,87,.14)}
+.cam-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 14px;background:#0b0f0d;color:#fff}
+.cam-seg{display:inline-flex;background:rgba(255,255,255,.12);border-radius:999px;padding:3px}
+.cam-seg button{appearance:none;border:0;background:transparent;color:#fff;font-family:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:999px;cursor:pointer}
+.cam-seg button.on{background:#fff;color:#106033}
+.cam-lens{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.cam-lens[hidden]{display:none}
+.cam-lens select{width:auto;max-width:200px;padding:6px 30px 6px 10px;font-size:12.5px;border-radius:10px;background-color:#1b241f;color:#fff;border-color:#2c3a32}
+.cam-now{margin-left:auto;font-size:12px;opacity:.8}
+@media(max-width:520px){.cam-now{display:none}.cam-seg button{padding:8px 12px}}
 </style>
 </head>
 <body>
@@ -1259,7 +1268,8 @@ input[type=password]:focus,input[type=time]:focus{border-color:var(--brand-500);
           <input type="file" id="phCam" accept="image/*" capture="environment" hidden>
           <input type="file" id="phPick" accept="image/*,application/pdf" multiple hidden>
           <div class="ph-bar">
-            <button type="button" class="btn btn-gold cam-big" id="phCamBtn">📷 เปิดกล้องถ่ายภาพ</button>
+            <button type="button" class="btn btn-gold cam-big" id="phCamBtn">📷 กล้องหลัง</button>
+            <button type="button" class="btn btn-primary cam-big" id="phCamFrontBtn">🤳 กล้องหน้า</button>
             <span class="ph-note">ถ่ายจากกล้องได้ทันทีในหน้าเว็บ (ถ่ายได้หลายภาพต่อเนื่อง) · ระบบย่อขนาดและอัปโหลดอัตโนมัติ · ถ่ายเฉพาะส่วนที่จำเป็น หลีกเลี่ยงใบหน้า เพื่อรักษาความลับผู้รับบริการ
               <br><a href="#" id="phPickBtn" class="ph-alt">หรือแนบไฟล์ PDF / รูปจากเครื่อง (ถ้าจำเป็น)</a></span>
           </div>
@@ -1698,6 +1708,11 @@ input[type=password]:focus,input[type=time]:focus{border-color:var(--brand-500);
 <div class="overlay" id="ovCam">
   <div class="modal cam-modal">
     <div class="modal-hd"><h3>📷 ถ่ายภาพประกอบบันทึก</h3><button class="x" id="camClose">✕</button></div>
+    <div class="cam-top">
+      <div class="cam-seg"><button type="button" id="camBack" class="on">📷 กล้องหลัง</button><button type="button" id="camFront">🤳 กล้องหน้า</button></div>
+      <label class="cam-lens" id="camLensWrap" hidden>เลนส์ <select id="camLens"></select></label>
+      <span class="cam-now" id="camNow"></span>
+    </div>
     <div class="cam-body">
       <video id="camVideo" playsinline autoplay muted></video>
       <div class="cam-flash" id="camFlash"></div>
@@ -4012,34 +4027,62 @@ function startUpload(tmp, x, who){
   }, true);
 }
 
-/* ---------- 📷 กล้องในหน้าเว็บ (getUserMedia) ---------- */
-var CAM = { stream:null, facing:'environment', shots:0 };
+/* ---------- 📷 กล้องในหน้าเว็บ (getUserMedia) — กล้องหลัง/กล้องหน้า + เลือกเลนส์ ---------- */
+var CAM = { stream:null, facing:'environment', deviceId:'', shots:0, actual:'' };
 function camSupported(){ return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia); }
-function openCam(){
+function openCam(facing){
   if (!camSupported()){
     toast('เบราว์เซอร์นี้เปิดกล้องในหน้าเว็บไม่ได้ — จะเปิดกล้องของเครื่องแทน', 'warn');
-    $('phCam').click(); return;
+    $('phCam').setAttribute('capture', facing === 'user' ? 'user' : 'environment'); $('phCam').click(); return;
   }
+  CAM.facing = facing === 'user' ? 'user' : 'environment'; CAM.deviceId = '';
   CAM.shots = 0; $('camCount').textContent = '0'; $('camStrip').innerHTML = '';
   $('ovCam').classList.add('on'); startCam();
 }
+function camPaintMode(){
+  $('camBack').classList.toggle('on', CAM.actual !== 'user');
+  $('camFront').classList.toggle('on', CAM.actual === 'user');
+}
+function getStream(){
+  var md = navigator.mediaDevices, size = { width:{ ideal:1920 }, height:{ ideal:1080 } };
+  if (CAM.deviceId) return md.getUserMedia({ audio:false, video:Object.assign({ deviceId:{ exact:CAM.deviceId } }, size) });
+  return md.getUserMedia({ audio:false, video:Object.assign({ facingMode:{ exact:CAM.facing } }, size) })
+    .catch(function(){ return md.getUserMedia({ audio:false, video:Object.assign({ facingMode:{ ideal:CAM.facing } }, size) }); })
+    .catch(function(){ return md.getUserMedia({ audio:false, video:true }); });
+}
+function fillLenses(curId){
+  if (!navigator.mediaDevices.enumerateDevices) return;
+  navigator.mediaDevices.enumerateDevices().then(function(list){
+    var cams = list.filter(function(d){ return d.kind === 'videoinput'; });
+    var sel = $('camLens');
+    sel.innerHTML = cams.map(function(d, i){
+      var lb = d.label || ('กล้อง ' + (i + 1));
+      lb = lb.replace(/back|rear|environment/i, 'หลัง').replace(/front|user|facetime/i, 'หน้า');
+      return '<option value="' + esc(d.deviceId) + '"' + (d.deviceId === curId ? ' selected' : '') + '>' + esc(lb) + '</option>';
+    }).join('');
+    $('camLensWrap').hidden = cams.length < 2;
+  }).catch(function(){});
+}
 function startCam(){
   stopCam();
-  $('camMsg').textContent = 'กำลังเปิดกล้อง… (ถ้าเบราว์เซอร์ถาม ให้กด “อนุญาต”)'; $('camShot').disabled = true;
-  navigator.mediaDevices.getUserMedia({ audio:false, video:{ facingMode:{ ideal:CAM.facing }, width:{ ideal:1920 }, height:{ ideal:1080 } } })
-    .then(function(s){
-      CAM.stream = s; var v = $('camVideo');
-      v.srcObject = s; v.classList.toggle('mirror', CAM.facing === 'user');
-      var p = v.play(); if (p && p.catch) p.catch(function(){});
-      $('camMsg').textContent = ''; $('camShot').disabled = false;
-    })
-    .catch(function(e){
-      var n = e && e.name, msg = n === 'NotAllowedError' ? 'ไม่ได้รับอนุญาตให้ใช้กล้อง — กดไอคอนกล้อง/แม่กุญแจที่แถบที่อยู่ แล้วเลือก “อนุญาต” จากนั้นกดสลับกล้องอีกครั้ง'
-        : n === 'NotFoundError' || n === 'OverconstrainedError' ? 'ไม่พบกล้องในอุปกรณ์นี้' : n === 'NotReadableError' ? 'กล้องถูกใช้งานโดยแอปอื่นอยู่ — ปิดแอปนั้นแล้วลองใหม่' : 'เปิดกล้องไม่ได้ (' + (n || e) + ')';
-      if ((n === 'OverconstrainedError') && CAM.facing === 'environment'){ CAM.facing = 'user'; startCam(); return; }
-      $('camMsg').textContent = msg;
-    });
+  $('camMsg').textContent = 'กำลังเปิด' + (CAM.facing === 'user' && !CAM.deviceId ? 'กล้องหน้า' : 'กล้อง') + '… (ถ้าเบราว์เซอร์ถาม ให้กด “อนุญาต”)';
+  $('camShot').disabled = true;
+  getStream().then(function(s){
+    CAM.stream = s; var v = $('camVideo'), tr = s.getVideoTracks()[0], st = (tr && tr.getSettings) ? tr.getSettings() : {};
+    var lbl = (tr && tr.label) || '';
+    CAM.actual = st.facingMode || (/front|user|facetime/i.test(lbl) ? 'user' : /back|rear|environment/i.test(lbl) ? 'environment' : (CAM.deviceId ? '' : CAM.facing));
+    v.srcObject = s; v.classList.toggle('mirror', CAM.actual === 'user');
+    var p = v.play(); if (p && p.catch) p.catch(function(){});
+    $('camMsg').textContent = ''; $('camShot').disabled = false;
+    $('camNow').textContent = CAM.actual === 'user' ? '🤳 กล้องหน้า' : CAM.actual === 'environment' ? '📷 กล้องหลัง' : '📷 ' + (lbl || 'กล้อง');
+    camPaintMode(); fillLenses(st.deviceId || '');
+  }).catch(function(e){
+    var n = e && e.name;
+    $('camMsg').textContent = n === 'NotAllowedError' ? 'ไม่ได้รับอนุญาตให้ใช้กล้อง — กดไอคอนกล้อง/แม่กุญแจที่แถบที่อยู่ แล้วเลือก “อนุญาต” จากนั้นกดเลือกกล้องอีกครั้ง'
+      : n === 'NotFoundError' ? 'ไม่พบกล้องในอุปกรณ์นี้' : n === 'NotReadableError' ? 'กล้องถูกใช้งานโดยแอปอื่นอยู่ — ปิดแอปนั้นแล้วลองใหม่' : 'เปิดกล้องไม่ได้ (' + (n || e) + ')';
+  });
 }
+function setFacing(f){ CAM.facing = f; CAM.deviceId = ''; startCam(); }
 function stopCam(){ if (CAM.stream){ CAM.stream.getTracks().forEach(function(t){ t.stop(); }); CAM.stream = null; } var v = $('camVideo'); if (v) v.srcObject = null; }
 function closeCam(){ stopCam(); $('ovCam').classList.remove('on'); if (CAM.shots) toast('ถ่ายภาพแล้ว ' + CAM.shots + ' ภาพ — กำลังอัปโหลดอัตโนมัติ'); }
 function snapCam(){
@@ -4095,10 +4138,14 @@ function galleryHtml(list){
   }).join('') + '</div></div>';
 }
 function initPhotos(){
-  $('phCamBtn').addEventListener('click', openCam);
+  $('phCamBtn').addEventListener('click', function(){ openCam('environment'); });
+  $('phCamFrontBtn').addEventListener('click', function(){ openCam('user'); });
+  $('camBack').addEventListener('click', function(){ setFacing('environment'); });
+  $('camFront').addEventListener('click', function(){ setFacing('user'); });
+  $('camLens').addEventListener('change', function(){ CAM.deviceId = $('camLens').value; startCam(); });
   $('phPickBtn').addEventListener('click', function(e){ e.preventDefault(); $('phPick').click(); });
   $('camShot').addEventListener('click', snapCam);
-  $('camFlip').addEventListener('click', function(){ CAM.facing = CAM.facing === 'environment' ? 'user' : 'environment'; startCam(); });
+  $('camFlip').addEventListener('click', function(){ setFacing(CAM.actual === 'user' ? 'environment' : 'user'); });
   $('camDone').addEventListener('click', closeCam);
   $('camClose').addEventListener('click', closeCam);
   document.addEventListener('visibilitychange', function(){ if (document.hidden && CAM.stream) closeCam(); });
